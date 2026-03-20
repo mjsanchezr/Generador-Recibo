@@ -173,56 +173,25 @@ public class GeneradorDocumento {
         String totalLetras = NumerosEnLetras.soloLetras(recibo.getTotalBs());
         String totalFormateado = FormatoBolivar.formatear(recibo.getTotalBs());
 
-        // Línea 1: "Yo, NOMBRE, titular de la Cédula..."
-        XWPFParagraph p1 = doc.createParagraph();
-        p1.setAlignment(ParagraphAlignment.BOTH);
+        // Un solo párrafo justificado con múltiples runs (normal/negrita)
+        // para evitar saltos de línea no deseados entre frases.
+        XWPFParagraph p = doc.createParagraph();
+        p.setAlignment(ParagraphAlignment.BOTH);
 
-        run(p1, "Yo, ", false);
-        run(p1, recibo.getEmpleado().getNombreCompleto(), true);
-        run(p1, ", titular de la Cédula de Identidad N°", false);
-
-        // Línea 2: "V-CI, trabajador de la empresa EMPRESA, hago"
-        XWPFParagraph p2 = doc.createParagraph();
-        p2.setAlignment(ParagraphAlignment.BOTH);
-        run(p2, recibo.getEmpleado().getCedula() + ",", true);
-        run(p2, " trabajador de la empresa ", false);
-        run(p2, recibo.getEmpresa().getNombre(), true);
-        run(p2, ", hago", false);
-
-        // Línea 3: "constar que he recibido de mi patrono la cantidad de MONTO EN
-        // LETRAS"
-        XWPFParagraph p3 = doc.createParagraph();
-        p3.setAlignment(ParagraphAlignment.BOTH);
-        run(p3, "constar que he recibido de mi patrono la cantidad de ", false);
-        run(p3, totalLetras.toUpperCase(), true);
-
-        // Línea 4: "BOLIVARES (Bs.MONTO), monto"
-        XWPFParagraph p4 = doc.createParagraph();
-        p4.setAlignment(ParagraphAlignment.BOTH);
-        run(p4, "BOLIVARES (Bs." + totalFormateado + ")", true);
-        run(p4, ", monto", false);
-
-        // Línea 5: "equivalente a Setenta Dólares Americanos ($70) a la tasa..."
-        XWPFParagraph p5 = doc.createParagraph();
-        p5.setAlignment(ParagraphAlignment.BOTH);
-        run(p5, "equivalente a Setenta Dólares Americanos ($70) a la tasa oficial del BCV vigente el día de", false);
-
-        // Línea 6: "hoy FECHA por concepto de: CONCEPTO, otorgado"
-        XWPFParagraph p6 = doc.createParagraph();
-        p6.setAlignment(ParagraphAlignment.BOTH);
-        run(p6, "hoy " + recibo.getFechaCorta() + " por concepto de: ", false);
-        run(p6, "SALARIO BÁSICO Y CESTATICKET SOCIALISTA", true);
-        run(p6, ", otorgado", false);
-
-        // Línea 7: "por la empresa..."
-        XWPFParagraph p7 = doc.createParagraph();
-        p7.setAlignment(ParagraphAlignment.BOTH);
-        run(p7, "por la empresa de manera voluntaria con la finalidad de ayudar al trabajador a cubrir los", false);
-
-        // Línea 8: "gastos de asistencia..."
-        XWPFParagraph p8 = doc.createParagraph();
-        p8.setAlignment(ParagraphAlignment.BOTH);
-        run(p8, "gastos de asistencia y facilitar su movilización hasta su lugar de trabajo.", false);
+        run(p, "Yo, ", false);
+        run(p, recibo.getEmpleado().getNombreCompleto(), true);
+        run(p, ", titular de la Cédula de Identidad N° ", false);
+        run(p, recibo.getEmpleado().getCedula(), true);
+        run(p, ", trabajador de la empresa ", false);
+        run(p, recibo.getEmpresa().getNombre(), true);
+        run(p, ", hago constar que he recibido de mi patrono la cantidad de ", false);
+        run(p, totalLetras.toUpperCase() + " BOLIVARES (Bs." + totalFormateado + ")", true);
+        run(p, ", monto equivalente a Setenta Dólares Americanos ($70) a la tasa oficial del BCV" +
+                " vigente el día de hoy " + recibo.getFechaCorta() + " por concepto de: ", false);
+        run(p, "SALARIO BÁSICO Y CESTATICKET SOCIALISTA", true);
+        run(p, ", otorgado por la empresa de manera voluntaria con la finalidad de ayudar al" +
+                " trabajador a cubrir los gastos de asistencia y facilitar su movilización hasta" +
+                " su lugar de trabajo.", false);
     }
 
     private void crearParrafoCestaticket(XWPFDocument doc, Recibo recibo) {

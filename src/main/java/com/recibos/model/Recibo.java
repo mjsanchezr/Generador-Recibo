@@ -94,7 +94,7 @@ public class Recibo {
      */
     public String getMesEnEspanol() {
         return fecha.getMonth()
-                .getDisplayName(TextStyle.FULL, new Locale("es", "VE"))
+                .getDisplayName(TextStyle.FULL, Locale.of("es", "VE"))
                 .toUpperCase();
     }
 
@@ -104,7 +104,7 @@ public class Recibo {
      */
     public String getFechaFormateada() {
         String mes = fecha.getMonth()
-                .getDisplayName(TextStyle.FULL, new Locale("es", "VE"));
+                .getDisplayName(TextStyle.FULL, Locale.of("es", "VE"));
         // Capitaliza primera letra
         mes = Character.toUpperCase(mes.charAt(0)) + mes.substring(1);
         return fecha.getDayOfMonth() + " de " + mes + " de " + fecha.getYear();

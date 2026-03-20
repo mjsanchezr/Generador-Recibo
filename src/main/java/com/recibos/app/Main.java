@@ -4,6 +4,7 @@ import com.recibos.generator.GeneradorDocumento;
 import com.recibos.model.Recibo;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -94,8 +95,9 @@ public class Main {
                 Recibo recibo = Recibo.crear(fecha, tasaBCV);
                 GeneradorDocumento generador = new GeneradorDocumento();
 
-                // Guardar en el directorio de trabajo actual
-                Path directorio = Paths.get(System.getProperty("user.dir"));
+                // Guardar en la carpeta RECIBOS (junto al programa)
+                Path directorio = Paths.get(System.getProperty("user.dir"), "RECIBOS");
+                Files.createDirectories(directorio);
                 Path archivoGenerado = generador.generarDocumento(recibo, directorio);
 
                 System.out.println();
@@ -116,7 +118,7 @@ public class Main {
             continuar = preguntarSiContinuar(scanner);
         }
 
-        System.out.println("\n¡Hasta luego! Los recibos han sido guardados en la carpeta del programa.");
+        System.out.println("\n¡Hasta luego! Los recibos han sido guardados en la carpeta RECIBOS.");
         scanner.close();
     }
 
