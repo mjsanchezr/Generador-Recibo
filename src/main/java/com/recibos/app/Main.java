@@ -32,10 +32,9 @@ public class Main {
 
     private static final String BANNER = """
             ╔══════════════════════════════════════════════════════╗
-            ║        GENERADOR DE RECIBOS DE PAGO                 ║
+            ║    GENERADOR DE RECIBOS DE PAGO v2.0 (INTERACTIVO)   ║
             ║        CARDAMOMO Y CELERY, C.A.                     ║
             ║        RIF: J-407755994                             ║
-            ║  Salario: $30 | Cestaticket: $40 | Total: $70       ║
             ╚══════════════════════════════════════════════════════╝
             """;
 
