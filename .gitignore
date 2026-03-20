@@ -1,0 +1,16 @@
+# Maven
+target/
+dependency-reduced-pom.xml
+
+# Archivos generados (.docx)
+*.docx
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.class
+
+# macOS
+.DS_Store
+recibos-app.jar
