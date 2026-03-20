@@ -35,10 +35,6 @@ public class Main {
             ║        GENERADOR DE RECIBOS DE PAGO                 ║
             ║        CARDAMOMO Y CELERY, C.A.                     ║
             ║        RIF: J-407755994                             ║
-            ╠══════════════════════════════════════════════════════╣
-            ║  Empleada: YSAURA ALEJANDRA FAGUNDEZ COA            ║
-            ║  C.I. V-30.370.579                                  ║
-            ╠══════════════════════════════════════════════════════╣
             ║  Salario: $30 | Cestaticket: $40 | Total: $70       ║
             ╚══════════════════════════════════════════════════════╝
             """;
@@ -56,12 +52,34 @@ public class Main {
 
         while (continuar) {
             try {
+                // ── Solicitar datos del empleado ──────────────────────────
+                System.out.println("─────────────────────────────────────────────────");
+                String nombre;
+                while (true) {
+                    System.out.print("Ingrese el nombre completo del empleado: ");
+                    nombre = scanner.nextLine().trim().toUpperCase();
+                    if (!nombre.isEmpty())
+                        break;
+                    System.out.println("⚠  El nombre no puede estar vacío.");
+                }
+
+                String cedula;
+                while (true) {
+                    System.out.print("Ingrese la cédula (ej: V-12.345.678): ");
+                    cedula = scanner.nextLine().trim().toUpperCase();
+                    if (!cedula.isEmpty())
+                        break;
+                    System.out.println("⚠  La cédula no puede estar vacía.");
+                }
+
+                System.out.println("─────────────────────────────────────────────────");
+
                 // ── Solicitar datos al usuario ────────────────────────────
                 int dia = solicitarEntero(scanner, "Ingrese el día del período de pago (1-31): ", 1, 31);
                 int mes = solicitarEntero(scanner, "Ingrese el mes         (1=Enero ... 12=Diciembre): ", 1, 12);
                 int anio = solicitarEntero(scanner, "Ingrese el año         (ej: 2023): ", 2000, 2100);
 
-                System.out.printf("Ingrese la tasa BCV del día (Bs. por 1 USD, ej: 36.50): ");
+                System.out.print("Ingrese la tasa BCV del día (Bs. por 1 USD, ej: 36.50): ");
                 double tasaBCV = solicitarDecimal(scanner);
 
                 // ── Validar fecha ─────────────────────────────────────────
@@ -76,6 +94,7 @@ public class Main {
                 // ── Mostrar resumen para confirmar ─────────────────────────
                 System.out.println();
                 System.out.println("─────────────────────────────────────────────────");
+                System.out.printf("  Empleado: %s (C.I. %s)%n", nombre, cedula);
                 System.out.printf("  Período : %s de %s de %d%n", dia, MESES[mes - 1], anio);
                 System.out.printf("  Tasa BCV: Bs. %.2f / USD%n", tasaBCV);
                 System.out.printf("  Salario : Bs. %.2f  ($30 × %.2f)%n", 30 * tasaBCV, tasaBCV);
@@ -92,7 +111,9 @@ public class Main {
                 }
 
                 // ── Generar el documento ──────────────────────────────────
-                Recibo recibo = Recibo.crear(fecha, tasaBCV);
+                com.recibos.model.Empleado empleado = new com.recibos.model.Empleado(nombre, cedula);
+                com.recibos.model.DatosEmpresa empresa = com.recibos.model.DatosEmpresa.porDefecto();
+                Recibo recibo = new Recibo(fecha, tasaBCV, empleado, empresa);
                 GeneradorDocumento generador = new GeneradorDocumento();
 
                 // Guardar en la carpeta RECIBOS (junto al programa)
