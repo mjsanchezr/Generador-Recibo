@@ -1,6 +1,7 @@
 package com.recibos.generator;
 
 import com.recibos.model.Recibo;
+import com.recibos.model.TipoRecibo;
 import com.recibos.util.FormatoBolivar;
 import com.recibos.util.NumerosEnLetras;
 
@@ -64,7 +65,11 @@ public class GeneradorDocumento {
             // ── 3. Título principal: RECIBO DE PAGO ──────────────────────────
             crearTitulo(doc, "RECIBO DE PAGO");
             crearTitulo(doc, "");
-            crearTitulo(doc, "Salario y Cestaticket");
+            if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
+                crearTitulo(doc, "Salario y Cestaticket");
+            } else {
+                crearTitulo(doc, "Salario Especial por Día Feriado");
+            }
             crearTitulo(doc, "");
 
             // ── 4. Monto total en Bs. (subtítulo grande) ──────────────────────
@@ -78,7 +83,7 @@ public class GeneradorDocumento {
             crearParrafoCestaticket(doc, recibo);
 
             // ── 7. Párrafo beneficio social ──────────────────────────────────
-            crearParrafoBeneficio(doc);
+            crearParrafoBeneficio(doc, recibo);
 
             // ── 8. Espacio antes de tabla ────────────────────────────────────
             XWPFParagraph espacioTabla = doc.createParagraph();
@@ -173,8 +178,6 @@ public class GeneradorDocumento {
         String totalLetras = NumerosEnLetras.soloLetras(recibo.getTotalBs());
         String totalFormateado = FormatoBolivar.formatear(recibo.getTotalBs());
 
-        // Un solo párrafo justificado con múltiples runs (normal/negrita)
-        // para evitar saltos de línea no deseados entre frases.
         XWPFParagraph p = doc.createParagraph();
         p.setAlignment(ParagraphAlignment.BOTH);
 
@@ -186,77 +189,79 @@ public class GeneradorDocumento {
         run(p, recibo.getEmpresa().getNombre(), true);
         run(p, ", hago constar que he recibido de mi patrono la cantidad de ", false);
         run(p, totalLetras.toUpperCase() + " BOLIVARES (Bs." + totalFormateado + ")", true);
-        run(p, ", monto equivalente a Setenta Dólares Americanos ($70) a la tasa oficial del BCV" +
-                " vigente el día de hoy " + recibo.getFechaCorta() + " por concepto de: ", false);
-        run(p, "SALARIO BÁSICO Y CESTATICKET SOCIALISTA", true);
-        run(p, ", otorgado por la empresa de manera voluntaria con la finalidad de ayudar al" +
-                " trabajador a cubrir los gastos de asistencia y facilitar su movilización hasta" +
-                " su lugar de trabajo.", false);
+
+        if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
+            run(p, ", monto equivalente a Setenta Dólares Americanos ($70) a la tasa oficial del BCV" +
+                    " vigente el día de hoy " + recibo.getFechaCorta() + " por concepto de: ", false);
+            run(p, "SALARIO BÁSICO Y CESTATICKET SOCIALISTA", true);
+            run(p, ", otorgado por la empresa de manera voluntaria con la finalidad de ayudar al" +
+                    " trabajador a cubrir los gastos de asistencia y facilitar su movilización hasta" +
+                    " su lugar de trabajo.", false);
+        } else {
+            run(p, ", monto equivalente a un (01) día feriado laborado, calculado con base en la " +
+                    "tasa del dólar oficial del BCV vigente para el día hábil inmediato anterior, conforme " +
+                    "a los lineamientos establecidos por la empresa.", false);
+        }
     }
 
     private void crearParrafoCestaticket(XWPFDocument doc, Recibo recibo) {
-        // Párrafo vacío de separación
-        doc.createParagraph();
+        doc.createParagraph(); // Párrafo vacío de separación
 
-        // "Este bono comprende un [SUBRAYADO+NEGRITA: beneficio social...], en"
-        XWPFParagraph p1 = doc.createParagraph();
-        p1.setAlignment(ParagraphAlignment.BOTH);
-        run(p1, "Este bono comprende un ", false);
-        XWPFRun rSubr = p1.createRun();
-        aplicarFuente(rSubr, FUENTE_CUERPO, SZ_CUERPO, true);
-        rSubr.setUnderline(UnderlinePatterns.SINGLE);
-        rSubr.setText("beneficio social de carácter no remunerativo, ni salarial");
-        run(p1, ", en", false);
-
-        XWPFParagraph p2 = doc.createParagraph();
-        p2.setAlignment(ParagraphAlignment.BOTH);
-        run(p2, "virtud de lo convenido en la Cláusula Sexta del Contrato Individual de Trabajo, conforme a", false);
-
-        XWPFParagraph p3 = doc.createParagraph();
-        p3.setAlignment(ParagraphAlignment.BOTH);
-        run(p3, "lo establecido en el artículo 105 de la Ley Orgánica del Trabajo, los Trabajadores y las", false);
-
-        XWPFParagraph p4 = doc.createParagraph();
-        p4.setAlignment(ParagraphAlignment.BOTH);
-        run(p4, "Trabajadoras (LOTTT), y según lo dispuesto en la Ley del Cestaticket Socialista para los", false);
-
-        XWPFParagraph p5 = doc.createParagraph();
-        p5.setAlignment(ParagraphAlignment.BOTH);
-        run(p5, "Trabajadores y las Trabajadoras, y la Gaceta Oficial Extraordinaria de la República", false);
-
-        XWPFParagraph p6 = doc.createParagraph();
-        p6.setAlignment(ParagraphAlignment.BOTH);
-        run(p6, "Bolivariana de Venezuela N° 6.746 de fecha 01/05/2023, en las cuales se regula este", false);
-
-        XWPFParagraph p7 = doc.createParagraph();
-        p7.setAlignment(ParagraphAlignment.BOTH);
-        run(p7, "beneficio.", false);
+        if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
+            XWPFParagraph p1 = doc.createParagraph();
+            p1.setAlignment(ParagraphAlignment.BOTH);
+            run(p1, "Este bono comprende un ", false);
+            XWPFRun rSubr = p1.createRun();
+            aplicarFuente(rSubr, FUENTE_CUERPO, SZ_CUERPO, true);
+            rSubr.setUnderline(UnderlinePatterns.SINGLE);
+            rSubr.setText("beneficio social de carácter no remunerativo, ni salarial");
+            run(p1, ", en virtud de lo convenido en la Cláusula Sexta del Contrato " +
+                    "Individual de Trabajo, conforme a lo establecido en el artículo " +
+                    "105 de la Ley Orgánica del Trabajo, los Trabajadores y las " +
+                    "Trabajadoras (LOTTT), y según lo dispuesto en la Ley del " +
+                    "Cestaticket Socialista para los Trabajadores y las Trabajadoras, " +
+                    "y la Gaceta Oficial Extraordinaria de la República Bolivariana " +
+                    "de Venezuela N° 6.746 de fecha 01/05/2023, en las cuales se regula " +
+                    "este beneficio.", false);
+        } else {
+            XWPFParagraph p1 = doc.createParagraph();
+            p1.setAlignment(ParagraphAlignment.BOTH);
+            run(p1, "Dicho pago corresponde al día feriado del ", false);
+            run(p1, recibo.getFechaFormateada(), true);
+            run(p1, ", y comprende el salario correspondiente al día más un recargo del " +
+                    "cincuenta por ciento (50%) sobre el valor del día ordinario, de " +
+                    "conformidad con lo establecido en el artículo 119 de la Ley Orgánica " +
+                    "del Trabajo, los Trabajadores y las Trabajadoras (LOTTT), que regula el " +
+                    "pago de días feriados laborados.", false);
+        }
     }
 
-    private void crearParrafoBeneficio(XWPFDocument doc) {
+    private void crearParrafoBeneficio(XWPFDocument doc, Recibo recibo) {
         // Doble salto de línea antes del párrafo final de beneficio
         XWPFParagraph pSep = doc.createParagraph();
         pSep.setAlignment(ParagraphAlignment.BOTH);
         XWPFRun rBr1 = pSep.createRun();
         rBr1.addBreak();
 
-        // "En tal sentido, el monto recibido [NEGRITA: no genera incidencia...], ni
-        // constituye base"
-        run(pSep, "En tal sentido, el monto recibido ", false);
-        XWPFRun rNeg = pSep.createRun();
-        aplicarFuente(rNeg, FUENTE_CUERPO, SZ_CUERPO, true);
-        rNeg.setText("no genera incidencia salarial alguna");
-        run(pSep, ", ni constituye base", false);
-
-        XWPFParagraph p2 = doc.createParagraph();
-        p2.setAlignment(ParagraphAlignment.BOTH);
-        run(p2, "de cálculo para prestaciones sociales, vacaciones, utilidades ni ningún otro beneficio", false);
-
-        XWPFParagraph p3 = doc.createParagraph();
-        p3.setAlignment(ParagraphAlignment.BOTH);
-        run(p3, "derivado de la relación laboral, por tratarse de un ", false);
-        run(p3, "beneficio de carácter social", true);
-        run(p3, ".", false);
+        if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
+            run(pSep, "En tal sentido, el monto recibido ", false);
+            XWPFRun rNeg = pSep.createRun();
+            aplicarFuente(rNeg, FUENTE_CUERPO, SZ_CUERPO, true);
+            rNeg.setText("no genera incidencia salarial alguna");
+            run(pSep, ", ni constituye base de cálculo para prestaciones sociales, vacaciones, " +
+                    "utilidades ni ningún otro beneficio derivado de la relación laboral, por " +
+                    "tratarse de un ", false);
+            run(pSep, "beneficio de carácter social", true);
+            run(pSep, ".", false);
+        } else {
+            run(pSep, "En tal sentido, el monto recibido ", false);
+            XWPFRun rNeg = pSep.createRun();
+            aplicarFuente(rNeg, FUENTE_CUERPO, SZ_CUERPO, true);
+            rNeg.setText("no constituye salario base");
+            run(pSep, " para el cálculo de prestaciones sociales, vacaciones, utilidades ni " +
+                    "ningún otro beneficio derivado de la relación laboral, salvo en los casos " +
+                    "expresamente previstos por la ley.", false);
+        }
     }
 
     private void crearTabla(XWPFDocument doc, Recibo recibo) {
@@ -277,13 +282,18 @@ public class GeneradorDocumento {
         setCeldaTabla(tabla, 0, 0, "Concepto", true, SZ_TABLA);
         setCeldaTabla(tabla, 0, 1, "Monto (Bs.)", true, SZ_TABLA);
 
-        // ── Fila 1: Salario Básico ────────────────────────────────────────
-        setCeldaTabla(tabla, 1, 0, "Salario Básico", false, SZ_TABLA);
-        setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
-
-        // ── Fila 2: Cestaticket ───────────────────────────────────────────
-        setCeldaTabla(tabla, 2, 0, "Cestaticket", false, SZ_TABLA);
-        setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
+        // ── Filas 1 y 2: Conceptos ────────────────────────────────────────
+        if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
+            setCeldaTabla(tabla, 1, 0, "Salario Básico", false, SZ_TABLA);
+            setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 0, "Cestaticket", false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
+        } else {
+            setCeldaTabla(tabla, 1, 0, "Valor día ordinario", false, SZ_TABLA);
+            setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 0, "Recargo 50% sobre día feriado", false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
+        }
 
         // ── Fila 3: Total a Pagar ─────────────────────────────────────────
         String totalTexto = FormatoBolivar.formatear(recibo.getTotalBs())

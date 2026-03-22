@@ -1,7 +1,7 @@
 package com.recibos.app;
 
-import com.recibos.generator.GeneradorDocumento;
 import com.recibos.model.Recibo;
+import com.recibos.model.TipoRecibo;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,6 +51,14 @@ public class Main {
 
         while (continuar) {
             try {
+                // ── Solicitar tipo de documento ───────────────────────────
+                System.out.println("─────────────────────────────────────────────────");
+                System.out.println("SELECCIONE EL MODELO A GENERAR:");
+                System.out.println("  1) Ordinario (Salario y Cestaticket)");
+                System.out.println("  2) Especial  (Día Feriado)");
+                int opcionModelo = solicitarEntero(scanner, "Opcion (1 o 2): ", 1, 2);
+                TipoRecibo tipoRecibo = (opcionModelo == 1) ? TipoRecibo.ORDINARIO : TipoRecibo.FERIADO;
+
                 // ── Solicitar datos del empleado ──────────────────────────
                 System.out.println("─────────────────────────────────────────────────");
                 String nombre;
@@ -93,12 +101,22 @@ public class Main {
                 // ── Mostrar resumen para confirmar ─────────────────────────
                 System.out.println();
                 System.out.println("─────────────────────────────────────────────────");
+                System.out.printf("  Modelo  : %s%n",
+                        (tipoRecibo == TipoRecibo.ORDINARIO) ? "Ordinario" : "Día Feriado");
                 System.out.printf("  Empleado: %s (C.I. %s)%n", nombre, cedula);
                 System.out.printf("  Período : %s de %s de %d%n", dia, MESES[mes - 1], anio);
                 System.out.printf("  Tasa BCV: Bs. %.2f / USD%n", tasaBCV);
-                System.out.printf("  Salario : Bs. %.2f  ($30 × %.2f)%n", 30 * tasaBCV, tasaBCV);
-                System.out.printf("  Cesta   : Bs. %.2f  ($40 × %.2f)%n", 40 * tasaBCV, tasaBCV);
-                System.out.printf("  TOTAL   : Bs. %.2f  ($70 × %.2f)%n", 70 * tasaBCV, tasaBCV);
+
+                if (tipoRecibo == TipoRecibo.ORDINARIO) {
+                    System.out.printf("  Salario : Bs. %.2f  ($30 × %.2f)%n", 30 * tasaBCV, tasaBCV);
+                    System.out.printf("  Cesta   : Bs. %.2f  ($40 × %.2f)%n", 40 * tasaBCV, tasaBCV);
+                    System.out.printf("  TOTAL   : Bs. %.2f  ($70 × %.2f)%n", 70 * tasaBCV, tasaBCV);
+                } else {
+                    System.out.printf("  Base    : Bs. %.2f  ($1.0 × %.2f)%n", 1.0 * tasaBCV, tasaBCV);
+                    System.out.printf("  Recargo : Bs. %.2f  ($0.5 × %.2f)%n", 0.5 * tasaBCV, tasaBCV);
+                    System.out.printf("  TOTAL   : Bs. %.2f  ($1.5 × %.2f)%n", 1.5 * tasaBCV, tasaBCV);
+                }
+
                 System.out.println("─────────────────────────────────────────────────");
                 System.out.print("¿Confirmar y generar el documento? (S/N): ");
 
@@ -112,8 +130,8 @@ public class Main {
                 // ── Generar el documento ──────────────────────────────────
                 com.recibos.model.Empleado empleado = new com.recibos.model.Empleado(nombre, cedula);
                 com.recibos.model.DatosEmpresa empresa = com.recibos.model.DatosEmpresa.porDefecto();
-                Recibo recibo = new Recibo(fecha, tasaBCV, empleado, empresa);
-                GeneradorDocumento generador = new GeneradorDocumento();
+                Recibo recibo = new Recibo(tipoRecibo, fecha, tasaBCV, empleado, empresa);
+                com.recibos.generator.GeneradorDocumento generador = new com.recibos.generator.GeneradorDocumento();
 
                 // Guardar en la carpeta RECIBOS (junto al programa)
                 Path directorio = Paths.get(System.getProperty("user.dir"), "RECIBOS");

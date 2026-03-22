@@ -15,13 +15,17 @@ import java.util.Locale;
  */
 public class Recibo {
 
-    // Valores fijos en USD (según solicitud del usuario)
-    public static final double SALARIO_USD = 30.0;
-    public static final double CESTATICKET_USD = 40.0;
-    public static final double TOTAL_USD = SALARIO_USD + CESTATICKET_USD;
+    // Valores fijos en USD para ORDINARIO
+    public static final double SALARIO_ORDINARIO_USD = 30.0;
+    public static final double CESTATICKET_ORDINARIO_USD = 40.0;
+
+    // Valores fijos en USD para FERIADO
+    public static final double SALARIO_FERIADO_USD = 1.0;
+    public static final double RECARGO_FERIADO_USD = 0.5;
 
     private final LocalDate fecha;
     private final double tasaBCV;
+    private final TipoRecibo tipo;
     private final double salarioBs;
     private final double cestaticketBs;
     private final double totalBs;
@@ -31,34 +35,49 @@ public class Recibo {
     /**
      * Constructor principal. Calcula automáticamente los montos en bolívares.
      *
+     * @param tipo     Tipo de recibo a generar (ORDINARIO o FERIADO)
      * @param fecha    Fecha del recibo
      * @param tasaBCV  Tasa oficial del BCV (Bs. por 1 USD)
      * @param empleado Datos del empleado
      * @param empresa  Datos de la empresa
      */
-    public Recibo(LocalDate fecha, double tasaBCV, Empleado empleado, DatosEmpresa empresa) {
+    public Recibo(TipoRecibo tipo, LocalDate fecha, double tasaBCV, Empleado empleado, DatosEmpresa empresa) {
+        this.tipo = tipo;
         this.fecha = fecha;
         this.tasaBCV = tasaBCV;
         this.empleado = empleado;
         this.empresa = empresa;
-        // Cálculo automático
-        this.salarioBs = SALARIO_USD * tasaBCV;
-        this.cestaticketBs = CESTATICKET_USD * tasaBCV;
-        this.totalBs = TOTAL_USD * tasaBCV;
+
+        // Cálculo automático según el tipo
+        if (tipo == TipoRecibo.ORDINARIO) {
+            this.salarioBs = SALARIO_ORDINARIO_USD * tasaBCV;
+            this.cestaticketBs = CESTATICKET_ORDINARIO_USD * tasaBCV;
+            this.totalBs = (SALARIO_ORDINARIO_USD + CESTATICKET_ORDINARIO_USD) * tasaBCV;
+        } else {
+            // FERIADO: salarioBs es el valor día, cestaticketBs es el recargo
+            this.salarioBs = SALARIO_FERIADO_USD * tasaBCV;
+            this.cestaticketBs = RECARGO_FERIADO_USD * tasaBCV;
+            this.totalBs = (SALARIO_FERIADO_USD + RECARGO_FERIADO_USD) * tasaBCV;
+        }
     }
 
     /**
      * Crea un recibo con los datos por defecto de empresa y empleada.
      *
+     * @param tipo    Tipo de recibo
      * @param fecha   Fecha del recibo
      * @param tasaBCV Tasa BCV del día
-     * @return Recibo con los datos de CARDAMOMO Y CELERY / YSAURA FAGUNDEZ
+     * @return Recibo con los datos por defecto
      */
-    public static Recibo crear(LocalDate fecha, double tasaBCV) {
-        return new Recibo(fecha, tasaBCV, Empleado.porDefecto(), DatosEmpresa.porDefecto());
+    public static Recibo crear(TipoRecibo tipo, LocalDate fecha, double tasaBCV) {
+        return new Recibo(tipo, fecha, tasaBCV, Empleado.porDefecto(), DatosEmpresa.porDefecto());
     }
 
     // ── Getters ──────────────────────────────────────────────────────────────
+
+    public TipoRecibo getTipo() {
+        return tipo;
+    }
 
     public LocalDate getFecha() {
         return fecha;
@@ -124,13 +143,14 @@ public class Recibo {
      * Ejemplo: "RECIBO_PAGO_OCTUBRE_2023.docx"
      */
     public String getNombreArchivo() {
-        return "RECIBO_PAGO_" + getMesEnEspanol() + "_" + fecha.getYear() + ".docx";
+        String prefijo = (tipo == TipoRecibo.ORDINARIO) ? "RECIBO_PAGO_" : "RECIBO_FERIADO_";
+        return prefijo + getMesEnEspanol() + "_" + fecha.getYear() + ".docx";
     }
 
     @Override
     public String toString() {
         return String.format(
-                "Recibo[fecha=%s, tasa=%.2f, salario=%.2f, cestaticket=%.2f, total=%.2f]",
-                fecha, tasaBCV, salarioBs, cestaticketBs, totalBs);
+                "Recibo[tipo=%s, fecha=%s, tasa=%.2f, bs1=%.2f, bs2=%.2f, total=%.2f]",
+                tipo, fecha, tasaBCV, salarioBs, cestaticketBs, totalBs);
     }
 }
