@@ -160,7 +160,8 @@ public class Recibo {
         } else {
             prefijo = "RECIBO_HORAS_EXTRAS_";
         }
-        return prefijo + getMesEnEspanol() + "_" + fecha.getYear() + ".docx";
+        return prefijo + String.format("%02d", fecha.getDayOfMonth()) + "_" + getMesEnEspanol().toUpperCase() + "_"
+                + fecha.getYear() + ".docx";
     }
 
     @Override
