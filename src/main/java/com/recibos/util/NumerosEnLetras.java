@@ -49,7 +49,7 @@ public class NumerosEnLetras {
         if (centimos == 0) {
             return textoEntero + " BOLIVARES EXACTOS";
         } else {
-            return textoEntero + " CON " + centimos + " CENTIMOS BOLIVARES";
+            return textoEntero + " CON " + convertirEntero((long) centimos) + " CENTIMOS BOLIVARES";
         }
     }
 
@@ -142,7 +142,8 @@ public class NumerosEnLetras {
         if (centimos == 0) {
             return textoEntero;
         } else {
-            return textoEntero + " CON " + centimos + " CENTIMOS";
+            return (textoEntero.equals("CERO") ? "" : textoEntero + " CON ") + convertirEntero((long) centimos)
+                    + " CENTIMOS";
         }
     }
 }
