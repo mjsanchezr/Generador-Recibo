@@ -56,8 +56,15 @@ public class Main {
                 System.out.println("SELECCIONE EL MODELO A GENERAR:");
                 System.out.println("  1) Ordinario (Salario y Cestaticket)");
                 System.out.println("  2) Especial  (Día Feriado)");
-                int opcionModelo = solicitarEntero(scanner, "Opcion (1 o 2): ", 1, 2);
-                TipoRecibo tipoRecibo = (opcionModelo == 1) ? TipoRecibo.ORDINARIO : TipoRecibo.FERIADO;
+                System.out.println("  3) Extra     (Horas Extraordinarias)");
+                int opcionModelo = solicitarEntero(scanner, "Opcion (1, 2 o 3): ", 1, 3);
+                TipoRecibo tipoRecibo;
+                if (opcionModelo == 1)
+                    tipoRecibo = TipoRecibo.ORDINARIO;
+                else if (opcionModelo == 2)
+                    tipoRecibo = TipoRecibo.FERIADO;
+                else
+                    tipoRecibo = TipoRecibo.HORA_EXTRA;
 
                 // ── Solicitar datos del empleado ──────────────────────────
                 System.out.println("─────────────────────────────────────────────────");
@@ -101,8 +108,15 @@ public class Main {
                 // ── Mostrar resumen para confirmar ─────────────────────────
                 System.out.println();
                 System.out.println("─────────────────────────────────────────────────");
-                System.out.printf("  Modelo  : %s%n",
-                        (tipoRecibo == TipoRecibo.ORDINARIO) ? "Ordinario" : "Día Feriado");
+                String nombreModelo;
+                if (tipoRecibo == TipoRecibo.ORDINARIO)
+                    nombreModelo = "Ordinario";
+                else if (tipoRecibo == TipoRecibo.FERIADO)
+                    nombreModelo = "Día Feriado";
+                else
+                    nombreModelo = "Horas Extraordinarias";
+
+                System.out.printf("  Modelo  : %s%n", nombreModelo);
                 System.out.printf("  Empleado: %s (C.I. %s)%n", nombre, cedula);
                 System.out.printf("  Período : %s de %s de %d%n", dia, MESES[mes - 1], anio);
                 System.out.printf("  Tasa BCV: Bs. %.2f / USD%n", tasaBCV);
@@ -111,10 +125,14 @@ public class Main {
                     System.out.printf("  Salario : Bs. %.2f  ($30 × %.2f)%n", 30 * tasaBCV, tasaBCV);
                     System.out.printf("  Cesta   : Bs. %.2f  ($40 × %.2f)%n", 40 * tasaBCV, tasaBCV);
                     System.out.printf("  TOTAL   : Bs. %.2f  ($70 × %.2f)%n", 70 * tasaBCV, tasaBCV);
-                } else {
+                } else if (tipoRecibo == TipoRecibo.FERIADO) {
                     System.out.printf("  Base    : Bs. %.2f  ($1.0 × %.2f)%n", 1.0 * tasaBCV, tasaBCV);
                     System.out.printf("  Recargo : Bs. %.2f  ($0.5 × %.2f)%n", 0.5 * tasaBCV, tasaBCV);
                     System.out.printf("  TOTAL   : Bs. %.2f  ($1.5 × %.2f)%n", 1.5 * tasaBCV, tasaBCV);
+                } else {
+                    System.out.printf("  Base Hr : Bs. %.2f  ($0.125 × %.2f)%n", 0.125 * tasaBCV, tasaBCV);
+                    System.out.printf("  Recargo : Bs. %.2f  ($0.0625 × %.2f)%n", 0.0625 * tasaBCV, tasaBCV);
+                    System.out.printf("  TOTAL   : Bs. %.2f  ($0.1875 × %.2f)%n", 0.1875 * tasaBCV, tasaBCV);
                 }
 
                 System.out.println("─────────────────────────────────────────────────");

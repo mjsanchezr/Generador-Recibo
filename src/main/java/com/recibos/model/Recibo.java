@@ -23,6 +23,10 @@ public class Recibo {
     public static final double SALARIO_FERIADO_USD = 1.0;
     public static final double RECARGO_FERIADO_USD = 0.5;
 
+    // Valores fijos en USD para HORA_EXTRA
+    public static final double SALARIO_HORA_EXTRA_USD = 0.125;
+    public static final double RECARGO_HORA_EXTRA_USD = 0.0625;
+
     private final LocalDate fecha;
     private final double tasaBCV;
     private final TipoRecibo tipo;
@@ -53,11 +57,16 @@ public class Recibo {
             this.salarioBs = SALARIO_ORDINARIO_USD * tasaBCV;
             this.cestaticketBs = CESTATICKET_ORDINARIO_USD * tasaBCV;
             this.totalBs = (SALARIO_ORDINARIO_USD + CESTATICKET_ORDINARIO_USD) * tasaBCV;
-        } else {
+        } else if (tipo == TipoRecibo.FERIADO) {
             // FERIADO: salarioBs es el valor día, cestaticketBs es el recargo
             this.salarioBs = SALARIO_FERIADO_USD * tasaBCV;
             this.cestaticketBs = RECARGO_FERIADO_USD * tasaBCV;
             this.totalBs = (SALARIO_FERIADO_USD + RECARGO_FERIADO_USD) * tasaBCV;
+        } else {
+            // HORA_EXTRA: salarioBs es el valor de la hora, cestaticketBs es el recargo
+            this.salarioBs = SALARIO_HORA_EXTRA_USD * tasaBCV;
+            this.cestaticketBs = RECARGO_HORA_EXTRA_USD * tasaBCV;
+            this.totalBs = (SALARIO_HORA_EXTRA_USD + RECARGO_HORA_EXTRA_USD) * tasaBCV;
         }
     }
 
@@ -143,7 +152,14 @@ public class Recibo {
      * Ejemplo: "RECIBO_PAGO_OCTUBRE_2023.docx"
      */
     public String getNombreArchivo() {
-        String prefijo = (tipo == TipoRecibo.ORDINARIO) ? "RECIBO_PAGO_" : "RECIBO_FERIADO_";
+        String prefijo;
+        if (tipo == TipoRecibo.ORDINARIO) {
+            prefijo = "RECIBO_PAGO_";
+        } else if (tipo == TipoRecibo.FERIADO) {
+            prefijo = "RECIBO_FERIADO_";
+        } else {
+            prefijo = "RECIBO_HORAS_EXTRAS_";
+        }
         return prefijo + getMesEnEspanol() + "_" + fecha.getYear() + ".docx";
     }
 

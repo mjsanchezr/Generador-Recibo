@@ -67,8 +67,10 @@ public class GeneradorDocumento {
             crearTitulo(doc, "");
             if (recibo.getTipo() == TipoRecibo.ORDINARIO) {
                 crearTitulo(doc, "Salario y Cestaticket");
-            } else {
+            } else if (recibo.getTipo() == TipoRecibo.FERIADO) {
                 crearTitulo(doc, "Salario Especial por Día Feriado");
+            } else {
+                crearTitulo(doc, "Pago de Horas Extraordinarias");
             }
             crearTitulo(doc, "");
 
@@ -197,8 +199,13 @@ public class GeneradorDocumento {
             run(p, ", otorgado por la empresa de manera voluntaria con la finalidad de ayudar al" +
                     " trabajador a cubrir los gastos de asistencia y facilitar su movilización hasta" +
                     " su lugar de trabajo.", false);
-        } else {
+        } else if (recibo.getTipo() == TipoRecibo.FERIADO) {
             run(p, ", monto equivalente a un (01) día feriado laborado, calculado con base en la " +
+                    "tasa del dólar oficial del BCV vigente para el día hábil inmediato anterior, conforme " +
+                    "a los lineamientos establecidos por la empresa.", false);
+        } else {
+            run(p, ", por concepto del pago de una (01) hora extraordinaria laborada (en " +
+                    "el horario comprendido de 7:00 pm a 8:00 pm), calculada con base en la " +
                     "tasa del dólar oficial del BCV vigente para el día hábil inmediato anterior, conforme " +
                     "a los lineamientos establecidos por la empresa.", false);
         }
@@ -223,7 +230,7 @@ public class GeneradorDocumento {
                     "y la Gaceta Oficial Extraordinaria de la República Bolivariana " +
                     "de Venezuela N° 6.746 de fecha 01/05/2023, en las cuales se regula " +
                     "este beneficio.", false);
-        } else {
+        } else if (recibo.getTipo() == TipoRecibo.FERIADO) {
             XWPFParagraph p1 = doc.createParagraph();
             p1.setAlignment(ParagraphAlignment.BOTH);
             run(p1, "Dicho pago corresponde al día feriado del ", false);
@@ -233,6 +240,16 @@ public class GeneradorDocumento {
                     "conformidad con lo establecido en el artículo 119 de la Ley Orgánica " +
                     "del Trabajo, los Trabajadores y las Trabajadoras (LOTTT), que regula el " +
                     "pago de días feriados laborados.", false);
+        } else {
+            XWPFParagraph p1 = doc.createParagraph();
+            p1.setAlignment(ParagraphAlignment.BOTH);
+            run(p1, "Dicho pago corresponde a la labor extraordinaria realizada el día ", false);
+            run(p1, recibo.getFechaFormateada(), true);
+            run(p1, ", y comprende el valor de una (01) hora de labor calculada sobre el " +
+                    "salario ordinario más un recargo del cincuenta por ciento (50%), de " +
+                    "conformidad con lo establecido en el artículo 118 de la Ley Orgánica " +
+                    "del Trabajo, los Trabajadores y las Trabajadoras (LOTTT), que regula el " +
+                    "pago de las horas extraordinarias.", false);
         }
     }
 
@@ -288,10 +305,15 @@ public class GeneradorDocumento {
             setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
             setCeldaTabla(tabla, 2, 0, "Cestaticket", false, SZ_TABLA);
             setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
-        } else {
+        } else if (recibo.getTipo() == TipoRecibo.FERIADO) {
             setCeldaTabla(tabla, 1, 0, "Valor día ordinario", false, SZ_TABLA);
             setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
             setCeldaTabla(tabla, 2, 0, "Recargo 50% sobre día feriado", false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
+        } else {
+            setCeldaTabla(tabla, 1, 0, "Valor 1 Hora Ordinaria", false, SZ_TABLA);
+            setCeldaTabla(tabla, 1, 1, FormatoBolivar.formatear(recibo.getSalarioBs()), false, SZ_TABLA);
+            setCeldaTabla(tabla, 2, 0, "Recargo 50% por Hora Extra", false, SZ_TABLA);
             setCeldaTabla(tabla, 2, 1, FormatoBolivar.formatear(recibo.getCestaticketBs()), false, SZ_TABLA);
         }
 
