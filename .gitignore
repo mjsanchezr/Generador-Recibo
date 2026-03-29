@@ -14,3 +14,5 @@ dependency-reduced-pom.xml
 # macOS
 .DS_Store
 recibos-app.jar
+recibos-web/node_modules
+recibos-web/dist
