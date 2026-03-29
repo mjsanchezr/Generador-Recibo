@@ -1,46 +1,7 @@
-# Generador de Recibos de Pago 📄
+# CARDAMOMO Y CELERY — Generador de Recibos de Pago
 
-Aplicación de consola en **Java 22** que genera recibos de pago en formato `.docx` editable para **YSAURA ALEJANDRA FAGUNDEZ COA** en **CARDAMOMO Y CELERY, C.A.**
+🌐 **[Abrir aplicación en GitHub Pages](https://mjsanchezr.github.io/CARDAMOMO-Y-CELERY-GENERADOR/)**
 
-## Requisitos
+Este proyecto es un generador de recibos de pago oficial para la empresa **CARDAMOMO Y CELERY, C.A.** Permite crear documentos `.docx` descargables directamente desde el navegador, sin necesidad de instalar ningún software. Soporta tres modelos de recibo: **Ordinario** (Salario y Cestaticket), **Especial** (Día Feriado), y **Extra** (Hora Extraordinaria); todos con cálculos automáticos aplicados a la tasa BCV oficial del día.
 
-- Java 22+
-- Maven 3.8+
-
-## Uso
-
-### Primera vez (compilar y ejecutar):
-```bash
-bash compilar.sh
-```
-
-### Ejecuciones posteriores:
-```bash
-java -jar recibos-app.jar
-```
-
-El programa solicitará:
-1. **Día** del período de pago
-2. **Mes** (1–12)
-3. **Año**
-4. **Tasa BCV del día** (Bs. por 1 USD)
-
-Y generará automáticamente el archivo `RECIBO_PAGO_[MES]_[AÑO].docx` en la carpeta del programa.
-
-## Cálculos
-
-| Concepto       | USD | Bs. (calculado) |
-|----------------|-----|-----------------|
-| Salario Básico | $30 | $30 × tasa BCV  |
-| Cestaticket    | $40 | $40 × tasa BCV  |
-| **Total**      | **$70** | **$70 × tasa BCV** |
-
-## Estructura del proyecto
-
-```
-src/main/java/com/recibos/
-├── model/           → Empleado, DatosEmpresa, Recibo
-├── util/            → NumerosEnLetras, FormatoBolivar
-├── generator/       → GeneradorDocumento (Apache POI)
-└── app/             → Main (menú interactivo)
-```
+El proyecto cuenta con dos componentes: un **backend en Java 22** (Apache POI + Maven) que sirve como lógica de referencia y genera documentos desde la terminal, y un **frontend web moderno** construido con React, Vite, TypeScript, Tailwind CSS, Framer Motion y la librería `docx.js`, capaz de generar y descargar los recibos directamente en el navegador sin ningún servidor.
